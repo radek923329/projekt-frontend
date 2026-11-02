@@ -2,106 +2,367 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Formularz Rezerwacji</title>
+    <title>Rezerwacja Hotelu - Potwierdzenie</title>
     <style>
-        body{
+        body {
+            font-family: Arial, sans-serif;
             background-image: url('reception.jpg');
-
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            margin: 0;
+            padding: 20px;
         }
-        form {
+        .container {
+            max-width: 550px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin: auto;
+        }
+        .section {
             display: flex;
             flex-direction: column;
-            max-width: 300px;
             gap: 10px;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        input, select, button {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #003580; /* Kolor Booking.com */
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            padding: 10px;
+        }
+        button:hover {
+            background-color: #00224f;
+        }
+        .room-card {
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 6px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .room-info h4 {
+            margin: 0 0 3px 0;
+            color: #003580;
+            font-size: 16px;
+        }
+        .room-info p {
+            margin: 2px 0;
+            font-size: 13px;
+            color: #555;
+        }
+        .summary-box {
+            background: #f8f9fa;
+            border: 1px solid #d6d8db;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .summary-box p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+        .confirmation-question {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .price-tag {
+            font-size: 18px;
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h2>Formularz</h2>
 
-    <form id="Formularz">
-        <label>Imię:</label>
-        <input 
-            type="text"
-            id="first_name"
-            placeholder="np. Jan"
-            pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+" 
-            title="Imię może zawierać tylko litery."
-            required>
+    <div class="container">
+        <h2>Rezerwacja Hotelu</h2>
 
-        <label>Drugie imię (pole opcjonalne):</label>
-        <input 
-            type="text" 
-            id="middle_name" 
-            placeholder="np. Paweł"
-            pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+" 
-            title="Drugie imię może zawierać tylko litery.">
+        <!-- KROK 1: WYSZUKIWANIE -->
+        <div id="search_section" class="section">
+            <h3>1. Wyszukaj pobyt</h3>
+            <label>Miasto:</label>
+            <select id="city_select" required>
+                <option value="">-- Wybierz miasto --</option>
+                <option value="Warszawa">Warszawa</option>
+                <option value="Kraków">Kraków</option>
+                <option value="Gdańsk">Gdańsk</option>
+                <option value="Wrocław">Wrocław</option>
+            </select>
 
-        <label>Nazwisko:</label>
-        <input 
-            type="text" 
-            id="last_name" 
-            placeholder="np. Adamczewski" 
-            pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+(-[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+)?" 
-            title="Nazwisko może składać się tylko z liter oraz opcjonalnie drugiego członu po myślniku."
-            required>
+            <label>Data zameldowania (Check-in):</label>
+            <input type="date" id="check_in" required>
 
-        <label>Data:</label>
-        <input type="date" id="date" required>
+            <label>Data wymeldowania (Check-out):</label>
+            <input type="date" id="check_out" disabled required>
 
-        <label>Numer telefonu:</label>
-        <input 
-            type="tel" 
-            id="phone_number" 
-            placeholder="np. 123456789" 
-            pattern="[0-9]{9}" 
-            maxlength="9"
-            title="Numer telefonu musi składać się z dokładnie 9 cyfr."
-            required>
+            <label>Ilość osób w pokoju:</label>
+            <select id="guests_count">
+                <option value="1">1 osoba</option>
+                <option value="2" selected>2 osoby</option>
+                <option value="3">3 osoby</option>
+                <option value="4">4+ osób</option>
+            </select>
 
-        <label>e-mail:</label>
-        <input type="email" id="e-mail" placeholder="np. adres@email.pl" required>
+            <label>Ilość pokoi:</label>
+            <input type="number" id="rooms_count" min="1" value="1">
 
-        <button type="submit">Wyślij</button>
-    </form>
+            <button type="button" id="search_btn">Szukaj pokoi</button>
+        </div>
+
+        <!-- KROK 2: WYNIKI -->
+        <div id="results_container" class="section hidden">
+            <h3>2. Wybierz pokój</h3>
+            <div id="rooms_list"></div>
+        </div>
+
+        <!-- KROK 3: DANE GOŚCIA -->
+        <div id="guest_section" class="section hidden">
+            <h3>3. Dane gościa</h3>
+            <p>Wybrany obiekt: <b id="selected_room_name">Brak</b></p>
+
+            <label>Imię:</label>
+            <input type="text" id="first_name" placeholder="np. Jan" pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+" required>
+
+            <label>Drugie imię (opcjonalnie):</label>
+            <input type="text" id="middle_name" placeholder="np. Paweł" pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+">
+
+            <label>Nazwisko:</label>
+            <input type="text" id="last_name" placeholder="np. Adamczewski" pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+(-[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+)?" required>
+
+            <label>Numer telefonu:</label>
+            <input type="tel" id="phone_number" placeholder="np. 123456789" pattern="[0-9]{9}" maxlength="9" required>
+
+            <label>e-mail:</label>
+            <input type="email" id="e-mail" placeholder="np. adres@email.pl" required>
+
+            <button type="button" id="go_to_summary_btn">Przejdź do podsumowania</button>
+        </div>
+
+        <!-- KROK 4: PODSUMOWANIE I POTWIERDZENIE (CZY JESTEŚ PEWIEN?) -->
+        <div id="summary_section" class="section hidden">
+            <h3>4. Podsumowanie i potwierdzenie</h3>
+            
+            <div class="summary-box">
+                <p>🏨 <b>Miejsce:</b> <span id="sum_hotel"></span> (<span id="sum_city"></span>)</p>
+                <p>🛏️ <b>Pokój:</b> <span id="sum_room"></span> (Liczba pokoi: <span id="sum_rooms_count"></span>)</p>
+                <p>👥 <b>Goście:</b> <span id="sum_guests"></span> os.</p>
+                <p>📅 <b>Termin:</b> od <span id="sum_checkin"></span> do <span id="sum_checkout"></span> (<span id="sum_nights"></span> nocy)</p>
+                <hr>
+                <p>👤 <b>Dane kontaktowe:</b> <span id="sum_name"></span> | <span id="sum_phone"></span> | <span id="sum_email"></span></p>
+                <hr>
+                <p style="text-align: center; margin-top: 10px;">
+                    <b>Cena całkowita:</b> <span class="price-tag" id="sum_total_price"></span> PLN
+                </p>
+            </div>
+
+            <p class="confirmation-question">Czy na pewno chcesz wysłać i potwierdzić tę rezerwację?</p>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="button" id="back_to_form_btn" style="background-color: #6c757d; flex: 1;">Wróć / Edytuj</button>
+                <button type="button" id="confirm_booking_btn" style="background-color: #28a745; flex: 2;">Tak, jestem pewien i wysyłam</button>
+            </div>
+        </div>
+
+    </div>
+
     <script>
-        //Ustawienie minimalnej daty rezerwacji
-        const dateInput = document.getElementById('date');
+        const checkInInput = document.getElementById('check_in');
+        const checkOutInput = document.getElementById('check_out');
+        const citySelect = document.getElementById('city_select');
+        const guestsSelect = document.getElementById('guests_count');
+        const roomsCountInput = document.getElementById('rooms_count');
+        const searchBtn = document.getElementById('search_btn');
+        const resultsContainer = document.getElementById('results_container');
+        const roomsList = document.getElementById('rooms_list');
+        const guestSection = document.getElementById('guest_section');
+        const summarySection = document.getElementById('summary_section');
+        const selectedRoomName = document.getElementById('selected_room_name');
+        
+        let selectedRoomData = null;
+
         const today = new Date().toISOString().split('T')[0];
-        dateInput.min = today;
+        checkInInput.min = today;
 
-        //Obsługa wysłania formularza i eksportu danych do pliku JSON
-        document.getElementById('Formularz').addEventListener('submit', function(e) {
-            e.preventDefault(); // Zatrzymuje domyślne przeładowanie strony
+        checkInInput.addEventListener('change', function() {
+            const checkInValue = this.value;
+            if (checkInValue) {
+                checkOutInput.disabled = false;
+                const nextDay = new Date(checkInValue);
+                nextDay.setDate(nextDay.getDate() + 1);
+                const minCheckOut = nextDay.toISOString().split('T')[0];
+                checkOutInput.min = minCheckOut;
 
-            // Tworzymy obiekt JavaScript z danymi pobranymi z pól formularza
-            const daneRezerwacji = {
+                if (checkOutInput.value && checkOutInput.value < minCheckOut) {
+                    checkOutInput.value = '';
+                }
+            } else {
+                checkOutInput.disabled = true;
+                checkOutInput.value = '';
+            }
+        });
+
+        searchBtn.addEventListener('click', async function() {
+            const city = citySelect.value;
+            const checkIn = checkInInput.value;
+            const checkOut = checkOutInput.value;
+            const guests = parseInt(guestsSelect.value);
+
+            if (!city || !checkIn || !checkOut) {
+                alert('Proszę wybrać miasto oraz obie daty pobytu.');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/rooms');
+                if (!response.ok) throw new Error('Błąd pobierania danych');
+                
+                const rooms = await response.json();
+                const filteredRooms = rooms.filter(room => 
+                    room.city === city && room.capacity >= guests
+                );
+
+                roomsList.innerHTML = '';
+                resultsContainer.classList.remove('hidden');
+                guestSection.classList.add('hidden');
+                summarySection.classList.add('hidden');
+
+                if (filteredRooms.length > 0) {
+                    filteredRooms.forEach(room => {
+                        const card = document.createElement('div');
+                        card.className = 'room-card';
+                        card.innerHTML = `
+                            <div class="room-info">
+                                <h4>🏨 ${room.hotelName}</h4>
+                                <p>🛏️ ${room.name}</p>
+                                <p>Max os.: ${room.capacity} | Cena: <strong>${room.price} PLN/noc</strong></p>
+                            </div>
+                            <button type="button" onclick='selectRoom(${JSON.stringify(room)})'>Wybierz</button>
+                        `;
+                        roomsList.appendChild(card);
+                    });
+                } else {
+                    roomsList.innerHTML = '<p>Brak dostępnych hoteli i pokoi dla podanych kryteriów.</p>';
+                }
+            } catch (error) {
+                console.error('Błąd:', error);
+                alert('Nie udało się połączyć z lokalnym serwerem (sprawdź json-server).');
+            }
+        });
+
+        window.selectRoom = function(room) {
+            selectedRoomData = room;
+            selectedRoomName.textContent = `${room.hotelName} - ${room.name} (${room.price} PLN/noc)`;
+            guestSection.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            guestSection.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // Przejście do podsumowania i kalkulacja ceny
+        document.getElementById('go_to_summary_btn').addEventListener('click', function() {
+            const firstName = document.getElementById('first_name').value;
+            const lastName = document.getElementById('last_name').value;
+            const phone = document.getElementById('phone_number').value;
+            const email = document.getElementById('e-mail').value;
+
+            if (!firstName || !lastName || !phone || !email) {
+                alert('Proszę uzupełnić wszystkie wymagane dane kontaktowe.');
+                return;
+            }
+
+            const checkInDate = new Date(checkInInput.value);
+            const checkOutDate = new Date(checkOutInput.value);
+            const timeDiff = checkOutDate - checkInDate;
+            const nights = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+            const roomsCount = parseInt(roomsCountInput.value) || 1;
+            const totalPrice = nights * selectedRoomData.price * roomsCount;
+
+            document.getElementById('sum_hotel').textContent = selectedRoomData.hotelName;
+            document.getElementById('sum_city').textContent = citySelect.value;
+            document.getElementById('sum_room').textContent = selectedRoomData.name;
+            document.getElementById('sum_rooms_count').textContent = roomsCount;
+            document.getElementById('sum_guests').textContent = guestsSelect.value;
+            document.getElementById('sum_checkin').textContent = checkInInput.value;
+            document.getElementById('sum_checkout').textContent = checkOutInput.value;
+            document.getElementById('sum_nights').textContent = nights;
+            document.getElementById('sum_name').textContent = `${firstName} ${document.getElementById('middle_name').value ? document.getElementById('middle_name').value + ' ' : ''}${lastName}`;
+            document.getElementById('sum_phone').textContent = phone;
+            document.getElementById('sum_email').textContent = email;
+            document.getElementById('sum_total_price').textContent = totalPrice;
+
+            guestSection.classList.add('hidden');
+            summarySection.classList.remove('hidden');
+            summarySection.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('back_to_form_btn').addEventListener('click', function() {
+            summarySection.classList.add('hidden');
+            guestSection.classList.remove('hidden');
+        });
+
+        // Ostateczne potwierdzenie i wysłanie danych (POST) do lokalnego serwera
+        document.getElementById('confirm_booking_btn').addEventListener('click', async function() {
+            const nowaRezerwacja = {
+                city: citySelect.value,
+                hotelName: selectedRoomData.hotelName,
+                roomId: selectedRoomData.id,
+                roomName: selectedRoomData.name,
+                guestsCount: guestsSelect.value,
+                roomsCount: parseInt(roomsCountInput.value) || 1,
                 firstName: document.getElementById('first_name').value,
                 middleName: document.getElementById('middle_name').value || null,
                 lastName: document.getElementById('last_name').value,
-                reservationDate: document.getElementById('date').value,
-                phoneNumber: document.getElementById('phone_number').value,
-                email: document.getElementById('e-mail').value
+                checkIn: checkInInput.value,
+                checkOut: checkOutInput.value,
+                phone: document.getElementById('phone_number').value,
+                email: document.getElementById('e-mail').value,
+                totalPrice: document.getElementById('sum_total_price').textContent
             };
 
-            // Zamieniamy obiekt na sformatowany tekst JSON
-            const jsonString = JSON.stringify(daneRezerwacji, null, 2);
+            try {
+                const response = await fetch('http://localhost:3000/reservations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(nowaRezerwacja)
+                });
 
-            // Tworzymy wirtualny plik w pamięci przeglądarki
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            // Tworzymy element <a> wymuszający pobranie pliku
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'rezerwacja.json';
-            link.click();
-
-            // Czyszczenie zasobów URL
-            URL.revokeObjectURL(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`Sukces! Rezerwacja została ostatecznie wysłana. ID rezerwacji: ${data.id}`);
+                    location.reload(); 
+                } else {
+                    alert('Wystąpił błąd podczas zapisywania rezerwacji.');
+                }
+            } catch (error) {
+                console.error('Błąd sieci:', error);
+                alert('Nie udało się połączyć z lokalnym serwerem.');
+            }
         });
     </script>
 </body>
