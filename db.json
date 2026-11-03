@@ -6,142 +6,106 @@
       "hotelName": "Hotel Grand Vistula",
       "name": "Pokój Jednoosobowy Standard",
       "capacity": 1,
-      "price": 160
+      "price": 160,
+      "availableRooms": 5
     },
     {
       "id": "2",
       "city": "Warszawa",
       "hotelName": "Hotel Grand Vistula",
-      "name": "Pokój Trzyosobowy Family",
-      "capacity": 3,
-      "price": 380
+      "name": "Pokój Dwuosobowy De Luxe",
+      "capacity": 2,
+      "price": 280,
+      "availableRooms": 2
     },
     {
       "id": "3",
       "city": "Warszawa",
       "hotelName": "Hotel Panorama City",
-      "name": "Pokój Dwuosobowy De Luxe",
-      "capacity": 2,
-      "price": 280
+      "name": "Apartament Czteroosobowy Royal",
+      "capacity": 4,
+      "price": 550,
+      "availableRooms": 1
     },
     {
       "id": "4",
-      "city": "Warszawa",
-      "hotelName": "Hotel Panorama City",
-      "name": "Apartament Czteroosobowy Royal",
-      "capacity": 4,
-      "price": 550
-    },
-    {
-      "id": "5",
       "city": "Kraków",
       "hotelName": "Hotel Pod Różą",
       "name": "Pokój Dwuosobowy Superior",
       "capacity": 2,
-      "price": 300
+      "price": 300,
+      "availableRooms": 4
     },
     {
-      "id": "6",
-      "city": "Kraków",
-      "hotelName": "Hotel Pod Różą",
-      "name": "Rodzinny Apartament (2 sypialnie)",
-      "capacity": 4,
-      "price": 600
-    },
-    {
-      "id": "7",
+      "id": "5",
       "city": "Kraków",
       "hotelName": "Royal Wawel Hotel",
       "name": "Pokój Trzyosobowy Comfort",
       "capacity": 3,
-      "price": 350
+      "price": 350,
+      "availableRooms": 1
     },
     {
-      "id": "8",
-      "city": "Gdańsk",
-      "hotelName": "Hotel Morska Bryza",
-      "name": "Studio z widokiem na morze",
-      "capacity": 2,
-      "price": 320
-    },
-    {
-      "id": "9",
-      "city": "Gdańsk",
-      "hotelName": "Hotel Morska Bryza",
-      "name": "Apartament Rodzinny nad morzem",
-      "capacity": 4,
-      "price": 580
-    },
-    {
-      "id": "10",
-      "city": "Gdańsk",
-      "hotelName": "Baltic View Hotel",
-      "name": "Pokój Trzyosobowy Executive",
-      "capacity": 3,
-      "price": 390
-    },
-    {
-      "id": "11",
-      "city": "Wrocław",
-      "hotelName": "The Market Square Hotel",
-      "name": "Pokój Trzyosobowy Classic",
-      "capacity": 3,
-      "price": 340
-    },
-    {
-      "id": "12",
-      "city": "Wrocław",
-      "hotelName": "The Market Square Hotel",
-      "name": "Duży Apartament z Tarasem",
-      "capacity": 4,
-      "price": 520
+      "id": "6",
+      "city": "Kraków",
+      "hotelName": "Royal Wawel Hotel",
+      "name": "Pokój Sześcioosobowy Comfort",
+      "capacity": 6,
+      "price": 550,
+      "availableRooms": 1
     }
   ],
   "reservations": [
     {
-      "city": "Gdańsk",
-      "roomId": "9",
-      "guestsCount": "2",
-      "roomsCount": "1",
-      "firstName": "Adam",
-      "middleName": null,
-      "lastName": "Podeszwa",
-      "checkIn": "2026-11-14",
-      "checkOut": "2026-12-05",
-      "phone": "123123123",
-      "email": "adam@podeszwa.pl",
-      "id": "wvMmO4ZMd7I"
-    },
-    {
-      "city": "Warszawa",
-      "roomId": "2",
-      "guestsCount": "2",
-      "roomsCount": "1",
-      "firstName": "Piotr",
-      "middleName": null,
-      "lastName": "Psikuta",
-      "checkIn": "2026-11-14",
-      "checkOut": "2026-11-27",
-      "phone": "777777777",
-      "email": "psi@kuta.com",
-      "id": "1BLNsPJ0s6M"
-    },
-    {
       "city": "Warszawa",
       "hotelName": "Hotel Grand Vistula",
       "roomId": "2",
-      "roomName": "Pokój Trzyosobowy Family",
+      "roomName": "Pokój Dwuosobowy De Luxe",
       "guestsCount": "2",
       "roomsCount": 1,
-      "firstName": "Kasia",
-      "middleName": null,
-      "lastName": "Klapek",
-      "checkIn": "2026-11-13",
+      "firstName": "a",
+      "middleName": "a",
+      "lastName": "a",
+      "checkIn": "2026-11-05",
+      "checkOut": "2026-11-26",
+      "phone": "a",
+      "email": "a",
+      "totalPrice": "5880",
+      "id": "PaX3SsmAhAU"
+    },
+    {
+      "city": "Warszawa",
+      "hotelName": "Hotel Panorama City",
+      "roomId": "3",
+      "roomName": "Apartament Czteroosobowy Royal",
+      "guestsCount": "2",
+      "roomsCount": 1,
+      "firstName": "a",
+      "middleName": "a",
+      "lastName": "a",
+      "checkIn": "2026-11-18",
       "checkOut": "2026-12-05",
-      "phone": "666666666",
-      "email": "klapek@kubota.pl",
-      "totalPrice": "8360",
-      "id": "mDZvtcwIJEs"
+      "phone": "a",
+      "email": "a",
+      "totalPrice": "9350",
+      "id": "J1HaFKVrg1A"
+    },
+    {
+      "city": "Kraków",
+      "hotelName": "Hotel Pod Różą",
+      "roomId": "4",
+      "roomName": "Pokój Dwuosobowy Superior",
+      "guestsCount": "2",
+      "roomsCount": 1,
+      "firstName": "a",
+      "middleName": "a",
+      "lastName": "a",
+      "checkIn": "2026-11-20",
+      "checkOut": "2026-12-03",
+      "phone": "111111111",
+      "email": "a@2",
+      "totalPrice": "3900",
+      "id": "wWIE2LRX9Hg"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

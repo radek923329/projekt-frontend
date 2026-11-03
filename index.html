@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Rezerwacja Hotelu - Potwierdzenie</title>
+    <title>Rezerwacja Hotelu - Projekt C</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,7 +38,7 @@
             border-radius: 4px;
         }
         button {
-            background-color: #003580; /* Kolor Booking.com */
+            background-color: #003580;
             color: white;
             font-weight: bold;
             cursor: pointer;
@@ -91,6 +91,12 @@
             color: #d9534f;
             font-weight: bold;
         }
+        .category-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 10px 0 5px 0;
+            color: #003580;
+        }
         .hidden {
             display: none;
         }
@@ -124,16 +130,16 @@
                 <option value="1">1 osoba</option>
                 <option value="2" selected>2 osoby</option>
                 <option value="3">3 osoby</option>
-                <option value="4">4+ osób</option>
+                <option value="4">4+ osób (w tym 5, 6 i więcej)</option>
             </select>
 
             <label>Ilość pokoi:</label>
-            <input type="number" id="rooms_count" min="1" value="1">
+            <input type="number" id="rooms_count" min="1" value="1" required>
 
             <button type="button" id="search_btn">Szukaj pokoi</button>
         </div>
 
-        <!-- KROK 2: WYNIKI -->
+        <!-- KROK 2: WYNIKI WYSZUKIWANIA -->
         <div id="results_container" class="section hidden">
             <h3>2. Wybierz pokój</h3>
             <div id="rooms_list"></div>
@@ -143,12 +149,13 @@
         <div id="guest_section" class="section hidden">
             <h3>3. Dane gościa</h3>
             <p>Wybrany obiekt: <b id="selected_room_name">Brak</b></p>
+            <p>Suma do zapłaty za pobyt: <b id="guest_total_price" class="price-tag">0</b> PLN</p>
 
             <label>Imię:</label>
             <input type="text" id="first_name" placeholder="np. Jan" pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+" required>
 
             <label>Drugie imię (opcjonalnie):</label>
-            <input type="text" id="middle_name" placeholder="np. Paweł" pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+">
+            <input type="text" id="middle_name" placeholder="np. Paweł" pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]*">
 
             <label>Nazwisko:</label>
             <input type="text" id="last_name" placeholder="np. Adamczewski" pattern="[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+(-[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż]+)?" required>
@@ -162,17 +169,17 @@
             <button type="button" id="go_to_summary_btn">Przejdź do podsumowania</button>
         </div>
 
-        <!-- KROK 4: PODSUMOWANIE I POTWIERDZENIE (CZY JESTEŚ PEWIEN?) -->
+        <!-- KROK 4: PODSUMOWANIE I OSTATECZNE POTWIERDZENIE -->
         <div id="summary_section" class="section hidden">
             <h3>4. Podsumowanie i potwierdzenie</h3>
             
             <div class="summary-box">
-                <p>🏨 <b>Miejsce:</b> <span id="sum_hotel"></span> (<span id="sum_city"></span>)</p>
-                <p>🛏️ <b>Pokój:</b> <span id="sum_room"></span> (Liczba pokoi: <span id="sum_rooms_count"></span>)</p>
-                <p>👥 <b>Goście:</b> <span id="sum_guests"></span> os.</p>
-                <p>📅 <b>Termin:</b> od <span id="sum_checkin"></span> do <span id="sum_checkout"></span> (<span id="sum_nights"></span> nocy)</p>
+                <p><b>Miejsce:</b> <span id="sum_hotel"></span> (<span id="sum_city"></span>)</p>
+                <p><b>Pokój:</b> <span id="sum_room"></span> (Liczba pokoi: <span id="sum_rooms_count"></span>)</p>
+                <p><b>Goście:</b> <span id="sum_guests"></span> os.</p>
+                <p><b>Termin:</b> od <span id="sum_checkin"></span> do <span id="sum_checkout"></span> (<span id="sum_nights"></span> nocy)</p>
                 <hr>
-                <p>👤 <b>Dane kontaktowe:</b> <span id="sum_name"></span> | <span id="sum_phone"></span> | <span id="sum_email"></span></p>
+                <p><b>Dane kontaktowe:</b> <span id="sum_name"></span> | <span id="sum_phone"></span> | <span id="sum_email"></span></p>
                 <hr>
                 <p style="text-align: center; margin-top: 10px;">
                     <b>Cena całkowita:</b> <span class="price-tag" id="sum_total_price"></span> PLN
@@ -201,8 +208,10 @@
         const guestSection = document.getElementById('guest_section');
         const summarySection = document.getElementById('summary_section');
         const selectedRoomName = document.getElementById('selected_room_name');
+        const guestTotalPrice = document.getElementById('guest_total_price');
         
         let selectedRoomData = null;
+        let fetchedRoomsCache = [];
 
         const today = new Date().toISOString().split('T')[0];
         checkInInput.min = today;
@@ -230,6 +239,13 @@
             const checkIn = checkInInput.value;
             const checkOut = checkOutInput.value;
             const guests = parseInt(guestsSelect.value);
+            const requestedRooms = parseInt(roomsCountInput.value);
+
+            if (isNaN(requestedRooms) || requestedRooms < 1) {
+                alert('Liczba pokoi musi wynosić co najmniej 1.');
+                roomsCountInput.value = 1;
+                return;
+            }
 
             if (!city || !checkIn || !checkOut) {
                 alert('Proszę wybrać miasto oraz obie daty pobytu.');
@@ -241,9 +257,17 @@
                 if (!response.ok) throw new Error('Błąd pobierania danych');
                 
                 const rooms = await response.json();
+                
                 const filteredRooms = rooms.filter(room => 
-                    room.city === city && room.capacity >= guests
+                    room.city === city && 
+                    room.capacity >= guests && 
+                    room.availableRooms >= requestedRooms
                 );
+
+                const exactRooms = filteredRooms.filter(room => room.capacity === guests);
+                const largerRooms = filteredRooms.filter(room => room.capacity > guests);
+
+                fetchedRoomsCache = [...exactRooms, ...largerRooms];
 
                 roomsList.innerHTML = '';
                 resultsContainer.classList.remove('hidden');
@@ -251,21 +275,53 @@
                 summarySection.classList.add('hidden');
 
                 if (filteredRooms.length > 0) {
-                    filteredRooms.forEach(room => {
-                        const card = document.createElement('div');
-                        card.className = 'room-card';
-                        card.innerHTML = `
-                            <div class="room-info">
-                                <h4>🏨 ${room.hotelName}</h4>
-                                <p>🛏️ ${room.name}</p>
-                                <p>Max os.: ${room.capacity} | Cena: <strong>${room.price} PLN/noc</strong></p>
-                            </div>
-                            <button type="button" onclick='selectRoom(${JSON.stringify(room)})'>Wybierz</button>
-                        `;
-                        roomsList.appendChild(card);
-                    });
+                    if (exactRooms.length > 0) {
+                        const exactTitle = document.createElement('div');
+                        exactTitle.className = 'category-title';
+                        exactTitle.textContent = 'Dokładnie dopasowane pokoje:';
+                        roomsList.appendChild(exactTitle);
+
+                        exactRooms.forEach(room => {
+                            const globalIndex = fetchedRoomsCache.indexOf(room);
+                            const card = document.createElement('div');
+                            card.className = 'room-card';
+                            card.innerHTML = `
+                                <div class="room-info">
+                                    <h4>${room.hotelName}</h4>
+                                    <p>${room.name}</p>
+                                    <p>Max os.: ${room.capacity} | Wolnych: ${room.availableRooms} | Cena: <strong>${room.price} PLN/noc</strong></p>
+                                </div>
+                                <button type="button" onclick="selectRoom(${globalIndex})">Wybierz</button>
+                            `;
+                            roomsList.appendChild(card);
+                        });
+                    }
+
+                    if (largerRooms.length > 0) {
+                        const largerTitle = document.createElement('div');
+                        largerTitle.className = 'category-title';
+                        largerTitle.style.marginTop = '15px';
+                        largerTitle.textContent = 'Dostępne większe pokoje:';
+                        roomsList.appendChild(largerTitle);
+
+                        largerRooms.forEach(room => {
+                            const globalIndex = fetchedRoomsCache.indexOf(room);
+                            const card = document.createElement('div');
+                            card.className = 'room-card';
+                            card.innerHTML = `
+                                <div class="room-info">
+                                    <h4>${room.hotelName}</h4>
+                                    <p>${room.name}</p>
+                                    <p>Max os.: ${room.capacity} | Wolnych: ${room.availableRooms} | Cena: <strong>${room.price} PLN/noc</strong></p>
+                                </div>
+                                <button type="button" onclick="selectRoom(${globalIndex})">Wybierz</button>
+                            `;
+                            roomsList.appendChild(card);
+                        });
+                    }
+
                 } else {
-                    roomsList.innerHTML = '<p>Brak dostępnych hoteli i pokoi dla podanych kryteriów.</p>';
+                    roomsList.innerHTML = `<p>Brak obiektów posiadających przynajmniej <strong>${requestedRooms}</strong> wolne pokoje o tych parametrach.</p>`;
                 }
             } catch (error) {
                 console.error('Błąd:', error);
@@ -273,23 +329,35 @@
             }
         });
 
-        window.selectRoom = function(room) {
-            selectedRoomData = room;
-            selectedRoomName.textContent = `${room.hotelName} - ${room.name} (${room.price} PLN/noc)`;
+        window.selectRoom = function(index) {
+            selectedRoomData = fetchedRoomsCache[index];
+            selectedRoomName.textContent = `${selectedRoomData.hotelName} - ${selectedRoomData.name} (${selectedRoomData.price} PLN/noc)`;
+            
+            const checkInDate = new Date(checkInInput.value);
+            const checkOutDate = new Date(checkOutInput.value);
+            const timeDiff = checkOutDate - checkInDate;
+            const nights = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            const roomsCount = parseInt(roomsCountInput.value) || 1;
+            const totalPrice = nights * selectedRoomData.price * roomsCount;
+
+            guestTotalPrice.textContent = totalPrice;
+
             guestSection.classList.remove('hidden');
             resultsContainer.classList.add('hidden');
             guestSection.scrollIntoView({ behavior: 'smooth' });
         };
 
-        // Przejście do podsumowania i kalkulacja ceny
+        // Walidacja danych gościa przed przejściem do podsumowania
         document.getElementById('go_to_summary_btn').addEventListener('click', function() {
-            const firstName = document.getElementById('first_name').value;
-            const lastName = document.getElementById('last_name').value;
-            const phone = document.getElementById('phone_number').value;
-            const email = document.getElementById('e-mail').value;
+            const firstNameInput = document.getElementById('first_name');
+            const middleNameInput = document.getElementById('middle_name');
+            const lastNameInput = document.getElementById('last_name');
+            const phoneInput = document.getElementById('phone_number');
+            const emailInput = document.getElementById('e-mail');
 
-            if (!firstName || !lastName || !phone || !email) {
-                alert('Proszę uzupełnić wszystkie wymagane dane kontaktowe.');
+            // Sprawdzamy poprawność wg reguł HTML5 (pattern, type="email", required)
+            if (!firstNameInput.checkValidity() || !middleNameInput.checkValidity() || !lastNameInput.checkValidity() || !phoneInput.checkValidity() || !emailInput.checkValidity()) {
+                alert('Proszę poprawnie uzupełnić dane:\n- Imię i nazwisko mogą zawierać tylko litery.\n- Numer telefonu musi składać się z dokładnie 9 cyfr.\n- Podaj poprawny adres e-mail.');
                 return;
             }
 
@@ -309,9 +377,11 @@
             document.getElementById('sum_checkin').textContent = checkInInput.value;
             document.getElementById('sum_checkout').textContent = checkOutInput.value;
             document.getElementById('sum_nights').textContent = nights;
-            document.getElementById('sum_name').textContent = `${firstName} ${document.getElementById('middle_name').value ? document.getElementById('middle_name').value + ' ' : ''}${lastName}`;
-            document.getElementById('sum_phone').textContent = phone;
-            document.getElementById('sum_email').textContent = email;
+            
+            const middleVal = middleNameInput.value ? middleNameInput.value + ' ' : '';
+            document.getElementById('sum_name').textContent = `${firstNameInput.value} ${middleVal}${lastNameInput.value}`;
+            document.getElementById('sum_phone').textContent = phoneInput.value;
+            document.getElementById('sum_email').textContent = emailInput.value;
             document.getElementById('sum_total_price').textContent = totalPrice;
 
             guestSection.classList.add('hidden');
@@ -324,7 +394,6 @@
             guestSection.classList.remove('hidden');
         });
 
-        // Ostateczne potwierdzenie i wysłanie danych (POST) do lokalnego serwera
         document.getElementById('confirm_booking_btn').addEventListener('click', async function() {
             const nowaRezerwacja = {
                 city: citySelect.value,
@@ -340,7 +409,7 @@
                 checkOut: checkOutInput.value,
                 phone: document.getElementById('phone_number').value,
                 email: document.getElementById('e-mail').value,
-                totalPrice: document.getElementById('sum_total_price').textContent
+                totalPrice: guestTotalPrice.textContent
             };
 
             try {
@@ -357,11 +426,11 @@
                     alert(`Sukces! Rezerwacja została ostatecznie wysłana. ID rezerwacji: ${data.id}`);
                     location.reload(); 
                 } else {
-                    alert('Wystąpił błąd podczas zapisywania rezerwacji.');
+                    alert('Wystąpił błąd podczas zapisywania rezerwacji na serwerze.');
                 }
             } catch (error) {
                 console.error('Błąd sieci:', error);
-                alert('Nie udało się połączyć z lokalnym serwerem.');
+                alert('Nie udało się połączyć z lokalnym serwerem (sprawdź json-server).');
             }
         });
     </script>
